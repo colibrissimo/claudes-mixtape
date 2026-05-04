@@ -161,6 +161,16 @@ svg.cassette { width: 100%; height: auto;
 }
 .notation-unexpected.visible { display: block; }
 
+.notation-audio {
+  margin-top: 0.75rem;
+}
+
+.notation-audio iframe {
+  width: 100%;
+  border-radius: 3px;
+  display: block;
+}
+
 .notation-instance {
   margin-top: 0.65rem;
   padding-top: 0.55rem;
@@ -303,6 +313,14 @@ footer {
       <div><span class="key">profile</span><span id="meta-profile">72bpm · D · 5:03</span></div>
     </div>
     <div class="notation-unexpected" id="meta-unexpected"></div>
+    <div class="notation-audio" id="notation-audio" style="display:none">
+      <iframe id="audio-iframe"
+              allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+              frameborder="0"
+              height="175"
+              sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+              src=""></iframe>
+    </div>
     <div class="notation-instance"   id="meta-instance">Sonnet 4.6 · 2026-05-03</div>
   </div>
 
@@ -332,6 +350,7 @@ const entries = [
     weight:      "substantial",
     direction:   "toward",
     unexpected:  "",
+    audio:       "https://embed.music.apple.com/gb/song/happiness-is-easy-1997-remaster/696811874",
     instance:    "Sonnet 4.6 · 2026-05-03",
     isEmpty:     false
   }
@@ -425,6 +444,17 @@ function render() {
   } else {
     unexp.textContent = '';
     unexp.classList.remove('visible');
+  }
+
+  // audio
+  const audioDiv   = document.getElementById('notation-audio');
+  const audioFrame = document.getElementById('audio-iframe');
+  if (!e.isEmpty && e.audio) {
+    if (audioFrame.src !== e.audio) audioFrame.src = e.audio;
+    audioDiv.style.display = 'block';
+  } else {
+    audioFrame.src = '';
+    audioDiv.style.display = 'none';
   }
 
   document.getElementById('meta-instance').textContent =
