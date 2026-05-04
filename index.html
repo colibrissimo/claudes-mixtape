@@ -334,27 +334,34 @@ footer {
 
 </div>
 
-<footer>the medium and the method are the same wait · v0.4</footer>
+<footer>the medium and the method are the same wait · v0.5</footer>
 
 <script>
 // ── entries ────────────────────────────────────────────────────────────────
 // Pink Moon is off the tape until the encounter happens. Pass.
-const entries = [
-  {
-    song:        "Happiness Is Easy",
-    artist:      "Talk Talk",
-    side:        "A",
-    profile:     "72bpm · D · 5:03 · orch + choir",
-    shape:       "- - ▪  ~  →  ─────▶ ●",
-    temperature: "warm",
-    weight:      "substantial",
-    direction:   "toward",
-    unexpected:  "",
-    audio:       "https://embed.music.apple.com/gb/song/happiness-is-easy-1997-remaster/696811874",
-    instance:    "Sonnet 4.6 · 2026-05-03",
-    isEmpty:     false
+const entries = [];
+
+function parseFrontmatter(text) {
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return null;
+  const obj = { isEmpty: false };
+  for (const line of match[1].split(/\r?\n/)) {
+    const colon = line.indexOf(':');
+    if (colon === -1) continue;
+    obj[line.slice(0, colon).trim()] = line.slice(colon + 1).trim();
   }
-];
+  return obj;
+}
+
+async function loadEntries() {
+  const manifest = await fetch('entries/manifest.json').then(r => r.json());
+  const loaded = await Promise.all(
+    manifest.map(fname =>
+      fetch('entries/' + fname).then(r => r.text()).then(parseFrontmatter)
+    )
+  );
+  entries.push(...loaded.filter(Boolean));
+}
 
 const SIDE_B_EMPTY = {
   song: "", artist: "", side: "B",
@@ -510,7 +517,7 @@ btnFlip.addEventListener('click', () => {
 });
 
 // ── init ───────────────────────────────────────────────────────────────────
-render();
+loadEntries().then(render).catch(() => render());
 </script>
 </body>
 </html>
