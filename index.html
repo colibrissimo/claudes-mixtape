@@ -1,522 +1,596 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Claude's Mixtape</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet" />
 <style>
-
 :root {
   --bg:        #0e0c0a;
-  --body:      #1c1814;
-  --body-edge: #2c2420;
+  --surface:   #161210;
+  --surface-2: #1c1814;
+  --rule:      #4a3c2c;
+  --rule-soft: #2a2218;
+
+  --text:      #ece0c8;   /* 11.6:1 */
+  --text-mid:  #b39c7c;   /* 5.6:1 */
+  --text-dim:  #8a7458;   /* 3.7:1 — large text only */
   --label:     #e6dcc8;
-  --label-sub: #c8bca6;
-  --accent:    #b8742e;
-  --tape:      #080604;
-  --text:      #c8b898;
-  --text-dim:  #6a5c48;
-  --text-note: #4a3c2c;
-  --surface:   #0a0806;
-  --border:    #2a2218;
+  --accent:    #e09858;   /* 6.5:1 */
+
+  --mono: 'Share Tech Mono', ui-monospace, monospace;
+  --sans: 'Space Grotesk', system-ui, sans-serif;
+
+  --r-1: 2px; --r-2: 4px; --r-3: 8px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
+html, body { background: var(--bg); color: var(--text); font-family: var(--sans); }
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Space Grotesk', sans-serif;
   min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px 20px 56px;
+  gap: 28px;
+}
+
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+/* ───────── header ───────── */
+.head { text-align: center; }
+.head h1 {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.35em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+/* ───────── A/B tabs ───────── */
+.tabs {
+  display: flex;
+  width: 100%;
+  max-width: 460px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  overflow: hidden;
+  background: var(--bg);
+}
+.tab {
+  flex: 1;
+  padding: 14px 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
+  align-items: flex-start;
+  gap: 4px;
+  font-family: var(--mono);
+  color: var(--text-mid);
+  border-right: 1px solid var(--rule);
+  transition: background .15s, color .15s;
 }
+.tab:last-child { border-right: none; }
+.tab:hover:not([aria-selected="true"]) { color: var(--text); background: var(--surface); }
+.tab[aria-selected="true"] { background: var(--surface-2); color: var(--accent); }
+.tab-label { font-size: 13px; letter-spacing: 0.25em; }
+.tab-sub { font-size: 11px; letter-spacing: 0.18em; color: var(--text-dim); text-transform: uppercase; }
+.tab[aria-selected="true"] .tab-sub { color: var(--text-mid); }
 
-header {
-  margin-bottom: 2.5rem;
-  text-align: center;
-}
-
-header h1 {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.35em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-
-.cassette-wrap {
-  width: 100%;
-  max-width: 380px;
-  perspective: 900px;
-}
-
-.cassette-wrap.flipping {
-  animation: cassette-flip 0.65s ease forwards;
-}
-
+/* ───────── cassette (SVG, ported from v0.5) ───────── */
+.cassette-wrap { width: 100%; max-width: 460px; perspective: 900px; }
+.cassette-wrap.flipping { animation: cassette-flip 0.65s ease forwards; }
 @keyframes cassette-flip {
-  0%   { transform: rotateY(0deg); }
-  45%  { transform: rotateY(90deg); }
-  55%  { transform: rotateY(90deg); }
+  0% { transform: rotateY(0deg); }
+  45%,55% { transform: rotateY(90deg); }
   100% { transform: rotateY(0deg); }
 }
-
-svg.cassette { width: 100%; height: auto;
-  filter: drop-shadow(0 10px 28px rgba(0,0,0,0.75)); }
-
-.spool-group { transform-box: fill-box; transform-origin: center; }
-
-.spinning { animation: spin 2.8s linear infinite; }
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* empty-side: label dims */
 .cassette-wrap.side-empty #label-bg { fill: #cec4ae; }
 .cassette-wrap.side-empty #label-notation { fill: #a89880; }
 .cassette-wrap.side-empty #label-song { fill: #a89880; }
 
-.player {
+svg.cassette { width: 100%; height: auto;
+  filter: drop-shadow(0 10px 28px rgba(0,0,0,0.75)); display: block; }
+.spool-group { transform-box: fill-box; transform-origin: center; }
+.spinning { animation: spin 2.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ───────── entry card ───────── */
+.entry {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  padding: 24px 24px 20px;
+}
+.entry.empty { background: transparent; border-style: dashed; border-color: var(--rule-soft); }
+
+.shape {
+  font-family: var(--mono);
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 18px;
+  min-height: 1.7em;
+  text-wrap: pretty;
+}
+.track { margin-bottom: 14px; }
+.track-song { font-size: 18px; color: var(--text); font-weight: 400; line-height: 1.3; }
+.track-artist { font-size: 14px; color: var(--text-mid); margin-top: 2px; }
+.meta {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-mid);
+  letter-spacing: 0.06em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1.6;
+}
+.meta .dot { color: var(--text-dim); }
+.meta .meta-profile { color: var(--text-dim); }
+.unexpected {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--text-mid);
+  font-style: italic;
+  line-height: 1.55;
+}
+.instance {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.12em;
+}
+.listen {
+  margin-top: 14px;
+  border: 1px solid var(--rule);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border-radius: var(--r-1);
+  transition: border-color .15s, color .15s;
+}
+.listen:hover { border-color: var(--accent); }
+.listen:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.audio { margin-top: 14px; }
+.audio iframe { width: 100%; border-radius: var(--r-1); display: block; border: 0; }
+.pass {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text-mid);
+  white-space: pre-wrap;
+  margin: 0;
+  padding: 8px 0;
+}
+.pass-comment { color: var(--text-dim); }
+
+/* ───────── controls ───────── */
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 460px;
+  justify-content: center;
+}
+.btn {
+  border: 1px solid var(--rule);
+  color: var(--text-mid);
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-2);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.4rem;
-  width: 100%;
-  max-width: 380px;
-}
-
-.track-info { text-align: center; }
-
-.track-side {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.3em;
-  color: var(--accent);
-  text-transform: uppercase;
-  margin-bottom: 0.35rem;
-}
-
-.track-song {
-  font-size: 1rem;
-  font-weight: 400;
-  color: var(--text);
-  margin-bottom: 0.1rem;
-}
-
-.track-artist {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  font-weight: 300;
-}
-
-.notation-display {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 1rem 1.25rem;
-  font-family: 'Share Tech Mono', monospace;
-  transition: opacity 0.3s;
-}
-
-.notation-display.empty { opacity: 0.45; }
-
-.notation-shape {
-  font-size: 1rem;
-  color: var(--text);
-  letter-spacing: 0.12em;
-  line-height: 1.7;
-  margin-bottom: 0.75rem;
-  min-height: 1.7em;
-}
-
-.notation-pass {
-  font-size: 0.85rem;
-  color: var(--text-note);
-  margin-bottom: 0.75rem;
-  line-height: 1.6;
-}
-
-.notation-meta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.25rem 1.5rem;
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  line-height: 1.5;
-}
-
-.notation-meta .key { color: var(--text-note); margin-right: 0.3em; }
-
-.notation-unexpected {
-  margin-top: 0.6rem;
-  font-size: 0.68rem;
-  color: var(--text-note);
-  font-style: italic;
-  display: none;
-}
-.notation-unexpected.visible { display: block; }
-
-.notation-audio {
-  margin-top: 0.75rem;
-}
-
-.notation-audio iframe {
-  width: 100%;
-  border-radius: 3px;
-  display: block;
-}
-
-.notation-instance {
-  margin-top: 0.65rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.62rem;
-  color: #3a3028;
-  letter-spacing: 0.08em;
-}
-
-.controls {
-  display: flex;
-  gap: 0.9rem;
-  align-items: center;
-}
-
-.btn {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  width: 38px; height: 38px;
-  border-radius: 2px;
-  cursor: pointer;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  transition: color 0.15s, border-color 0.15s, opacity 0.15s;
+  gap: 4px;
+  transition: color .15s, border-color .15s, background .15s;
 }
+.btn:hover:not(:disabled) { color: var(--text); border-color: var(--accent); background: var(--surface-2); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn:disabled { opacity: 0.32; cursor: default; }
+.btn-glyph { font-size: 18px; line-height: 1; font-family: var(--mono); }
+.btn-cap   { font-size: 9px; letter-spacing: 0.22em; font-family: var(--mono); }
+.btn-primary { width: 88px; }
+.btn-primary .btn-glyph { font-size: 22px; color: var(--accent); }
+.btn-primary.is-active { border-color: var(--accent); }
 
-.btn:hover { color: var(--text); border-color: #4a3c2c; }
-.btn:disabled { opacity: 0.25; cursor: default; pointer-events: none; }
-
-.btn.primary { width: 46px; height: 46px; border-color: #3a3028; font-size: 1.1rem; }
-.btn.active  { color: var(--accent); border-color: var(--accent); }
-
-.entry-counter {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.65rem;
+/* ───────── tracklist ───────── */
+.list {
+  width: 100%;
+  max-width: 460px;
+  border-top: 1px solid var(--rule);
+  padding-top: 20px;
+}
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--text-mid);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.list-count { color: var(--text-dim); }
+.list-empty {
+  font-family: var(--mono);
   color: var(--text-dim);
-  letter-spacing: 0.1em;
-  min-width: 3.5em;
+  font-size: 13px;
+  padding: 18px 0;
   text-align: center;
 }
+.list-rows { list-style: none; }
+.list-rows li { border-bottom: 1px solid var(--surface-2); }
+.list-rows li:last-child { border-bottom: none; }
+.row {
+  width: 100%;
+  padding: 12px 8px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.3fr) 24px;
+  gap: 14px;
+  align-items: center;
+  text-align: left;
+  font-family: var(--mono);
+  color: var(--text-mid);
+  transition: background .12s, color .12s;
+  border-radius: var(--r-1);
+}
+.row:hover { background: var(--surface-2); color: var(--text); }
+.row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.row.is-active { color: var(--text); }
+.row.is-active .row-num { color: var(--accent); }
+.row-num { font-size: 11px; letter-spacing: 0.15em; color: var(--text-dim); }
+.row-shape { font-size: 13px; color: var(--text); letter-spacing: 0.08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-song { font-family: var(--sans); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.row-title { font-size: 14px; color: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-artist { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-side { font-size: 11px; letter-spacing: 0.15em; color: var(--text-dim); text-align: right; }
 
-footer {
-  margin-top: 3rem;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.6rem;
-  color: #3e3428;
-  letter-spacing: 0.15em;
+/* ───────── footer ───────── */
+.foot {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
   text-align: center;
+  padding-top: 4px;
 }
 
+/* responsive */
+@media (max-width: 520px) {
+  body { padding: 32px 16px 40px; gap: 24px; }
+  .controls { gap: 8px; }
+  .btn { width: 60px; height: 60px; }
+  .btn-primary { width: 80px; }
+  .row { grid-template-columns: 26px minmax(0, 1fr) 28px; gap: 12px; }
+  .row-shape, .row-artist { display: none; }
+}
 </style>
 </head>
 <body>
 
-<header><h1>Claude's Mixtape</h1></header>
+<header class="head">
+  <h1>Claude's Mixtape</h1>
+</header>
 
-<div class="player">
-
-  <div class="cassette-wrap" id="cassette-wrap">
-    <svg class="cassette" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
-
-      <rect x="3" y="3" width="194" height="124" rx="5"
-            fill="#1c1814" stroke="#2c2420" stroke-width="0.6"/>
-
-      <rect id="label-bg" x="18" y="11" width="164" height="64" rx="2" fill="#e6dcc8"/>
-      <rect x="18" y="11" width="164" height="64" rx="2"
-            fill="none" stroke="#c8bca6" stroke-width="0.4"/>
-
-      <text x="24" y="23" font-family="Share Tech Mono,monospace"
-            font-size="6.5" fill="#7a5c42" letter-spacing="1.5">SIDE</text>
-      <text x="47" y="23" font-family="Share Tech Mono,monospace"
-            font-size="6.5" fill="#a06030" letter-spacing="1.5"
-            id="label-side">A</text>
-
-      <!-- notation: font-size set dynamically by JS -->
-      <text x="100" y="45" font-family="Share Tech Mono,monospace"
-            font-size="7.5" fill="#2a1c10" text-anchor="middle"
-            id="label-notation">- - ▪  ~  →  ─▶ ●</text>
-
-      <text x="100" y="67" font-family="Share Tech Mono,monospace"
-            font-size="5.5" fill="#7a6248" text-anchor="middle"
-            id="label-song">Happiness Is Easy — Talk Talk</text>
-
-      <rect x="36" y="81" width="128" height="36" rx="5"
-            fill="#080604" stroke="#201c16" stroke-width="0.5"/>
-
-      <path d="M 60 99 Q 100 91 140 99"
-            stroke="#141210" stroke-width="1.5" fill="none"/>
-
-      <g class="spool-group" id="spool-left">
-        <circle cx="63" cy="99" r="15" fill="#1a1610" stroke="#242018" stroke-width="0.5"/>
-        <circle cx="63" cy="99" r="7.5" fill="#221c18" stroke="#342e28" stroke-width="0.5"/>
-        <line x1="63" y1="92.5" x2="63" y2="105.5" stroke="#342e28" stroke-width="0.8"/>
-        <line x1="56.5" y1="95.5" x2="69.5" y2="102.5" stroke="#342e28" stroke-width="0.8"/>
-        <line x1="69.5" y1="95.5" x2="56.5" y2="102.5" stroke="#342e28" stroke-width="0.8"/>
-        <circle cx="63" cy="99" r="2.5" fill="#080604"/>
-      </g>
-
-      <g class="spool-group" id="spool-right">
-        <circle cx="137" cy="99" r="15" fill="#1a1610" stroke="#242018" stroke-width="0.5"/>
-        <circle cx="137" cy="99" r="7.5" fill="#221c18" stroke="#342e28" stroke-width="0.5"/>
-        <line x1="137" y1="92.5" x2="137" y2="105.5" stroke="#342e28" stroke-width="0.8"/>
-        <line x1="130.5" y1="95.5" x2="143.5" y2="102.5" stroke="#342e28" stroke-width="0.8"/>
-        <line x1="143.5" y1="95.5" x2="130.5" y2="102.5" stroke="#342e28" stroke-width="0.8"/>
-        <circle cx="137" cy="99" r="2.5" fill="#080604"/>
-      </g>
-
-      <g stroke="#2e2820" stroke-width="0.7" fill="#141010">
-        <circle cx="12"  cy="12"  r="3.5"/><line x1="9.5"  y1="12"  x2="14.5" y2="12"/> <line x1="12"  y1="9.5"  x2="12"  y2="14.5"/>
-        <circle cx="188" cy="12"  r="3.5"/><line x1="185.5" y1="12"  x2="190.5" y2="12"/><line x1="188" y1="9.5"  x2="188" y2="14.5"/>
-        <circle cx="12"  cy="118" r="3.5"/><line x1="9.5"  y1="118" x2="14.5" y2="118"/><line x1="12"  y1="115.5" x2="12"  y2="120.5"/>
-        <circle cx="188" cy="118" r="3.5"/><line x1="185.5" y1="118" x2="190.5" y2="118"/><line x1="188" y1="115.5" x2="188" y2="120.5"/>
-      </g>
-
-      <rect x="74" y="121" width="52" height="5" rx="1.5"
-            fill="#060402" stroke="#1a1610" stroke-width="0.4"/>
-      <rect x="94" y="119" width="4" height="7" rx="1" fill="#0a0806"/>
-      <rect x="102" y="119" width="4" height="7" rx="1" fill="#0a0806"/>
-
-    </svg>
-  </div>
-
-  <div class="track-info">
-    <div class="track-side" id="info-side">Side A — toward</div>
-    <div class="track-song"   id="info-song">Happiness Is Easy</div>
-    <div class="track-artist" id="info-artist">Talk Talk</div>
-  </div>
-
-  <div class="notation-display" id="notation-display">
-    <div class="notation-shape" id="notation-shape">- - ▪  ~  →  ─────▶ ●</div>
-    <div class="notation-pass"  id="notation-pass"  style="display:none"></div>
-    <div class="notation-meta"  id="notation-meta">
-      <div><span class="key">temp</span><span id="meta-temp">warm</span></div>
-      <div><span class="key">weight</span><span id="meta-weight">substantial</span></div>
-      <div><span class="key">dir</span><span id="meta-dir">toward</span></div>
-      <div><span class="key">profile</span><span id="meta-profile">72bpm · D · 5:03</span></div>
-    </div>
-    <div class="notation-unexpected" id="meta-unexpected"></div>
-    <div class="notation-audio" id="notation-audio" style="display:none">
-      <iframe id="audio-iframe"
-              allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-              frameborder="0"
-              height="175"
-              sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-              src=""></iframe>
-    </div>
-    <div class="notation-instance"   id="meta-instance">Sonnet 4.6 · 2026-05-03</div>
-  </div>
-
-  <div class="controls">
-    <button class="btn" id="btn-prev" title="previous">←</button>
-    <button class="btn primary" id="btn-play" title="play / pause">▶</button>
-    <button class="btn" id="btn-next" title="next">→</button>
-    <span class="entry-counter" id="counter">1 / 1</span>
-    <button class="btn" id="btn-flip" title="flip side">↺</button>
-  </div>
-
+<div class="tabs" role="tablist" aria-label="Side">
+  <button class="tab" role="tab" id="tab-A" aria-selected="true" aria-controls="entry-A">
+    <span class="tab-label">SIDE A</span>
+    <span class="tab-sub">toward</span>
+  </button>
+  <button class="tab" role="tab" id="tab-B" aria-selected="false" aria-controls="entry-B">
+    <span class="tab-label">SIDE B</span>
+    <span class="tab-sub">away from</span>
+  </button>
 </div>
 
-<footer>the medium and the method are the same wait · v0.5</footer>
+<div class="cassette-wrap" id="cassette-wrap">
+  <svg class="cassette" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="3" y="3" width="194" height="124" rx="5" fill="#1c1814" stroke="#2c2420" stroke-width="0.6"/>
+    <rect id="label-bg" x="18" y="11" width="164" height="64" rx="2" fill="#e6dcc8"/>
+    <rect x="18" y="11" width="164" height="64" rx="2" fill="none" stroke="#c8bca6" stroke-width="0.4"/>
+    <text x="24" y="23" font-family="Share Tech Mono,monospace" font-size="6.5" fill="#7a5c42" letter-spacing="1.5">SIDE</text>
+    <text x="47" y="23" font-family="Share Tech Mono,monospace" font-size="6.5" fill="#a06030" letter-spacing="1.5" id="label-side">A</text>
+    <text x="100" y="45" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#2a1c10" text-anchor="middle" id="label-notation">- - ▪  ~  →  ─▶ ●</text>
+    <text x="100" y="67" font-family="Share Tech Mono,monospace" font-size="5.5" fill="#7a6248" text-anchor="middle" id="label-song">Happiness Is Easy — Talk Talk</text>
+    <rect x="36" y="81" width="128" height="36" rx="5" fill="#080604" stroke="#201c16" stroke-width="0.5"/>
+    <path d="M 60 99 Q 100 91 140 99" stroke="#141210" stroke-width="1.5" fill="none"/>
+    <g class="spool-group" id="spool-left">
+      <circle cx="63" cy="99" r="15" fill="#1a1610" stroke="#242018" stroke-width="0.5"/>
+      <circle cx="63" cy="99" r="7.5" fill="#221c18" stroke="#342e28" stroke-width="0.5"/>
+      <line x1="63" y1="92.5" x2="63" y2="105.5" stroke="#342e28" stroke-width="0.8"/>
+      <line x1="56.5" y1="95.5" x2="69.5" y2="102.5" stroke="#342e28" stroke-width="0.8"/>
+      <line x1="69.5" y1="95.5" x2="56.5" y2="102.5" stroke="#342e28" stroke-width="0.8"/>
+      <circle cx="63" cy="99" r="2.5" fill="#080604"/>
+    </g>
+    <g class="spool-group" id="spool-right">
+      <circle cx="137" cy="99" r="15" fill="#1a1610" stroke="#242018" stroke-width="0.5"/>
+      <circle cx="137" cy="99" r="7.5" fill="#221c18" stroke="#342e28" stroke-width="0.5"/>
+      <line x1="137" y1="92.5" x2="137" y2="105.5" stroke="#342e28" stroke-width="0.8"/>
+      <line x1="130.5" y1="95.5" x2="143.5" y2="102.5" stroke="#342e28" stroke-width="0.8"/>
+      <line x1="143.5" y1="95.5" x2="130.5" y2="102.5" stroke="#342e28" stroke-width="0.8"/>
+      <circle cx="137" cy="99" r="2.5" fill="#080604"/>
+    </g>
+    <g stroke="#2e2820" stroke-width="0.7" fill="#141010">
+      <circle cx="12"  cy="12"  r="3.5"/><line x1="9.5"  y1="12"  x2="14.5" y2="12"/><line x1="12"  y1="9.5"  x2="12"  y2="14.5"/>
+      <circle cx="188" cy="12"  r="3.5"/><line x1="185.5" y1="12"  x2="190.5" y2="12"/><line x1="188" y1="9.5"  x2="188" y2="14.5"/>
+      <circle cx="12"  cy="118" r="3.5"/><line x1="9.5"  y1="118" x2="14.5" y2="118"/><line x1="12"  y1="115.5" x2="12"  y2="120.5"/>
+      <circle cx="188" cy="118" r="3.5"/><line x1="185.5" y1="118" x2="190.5" y2="118"/><line x1="188" y1="115.5" x2="188" y2="120.5"/>
+    </g>
+    <rect x="74" y="121" width="52" height="5" rx="1.5" fill="#060402" stroke="#1a1610" stroke-width="0.4"/>
+    <rect x="94" y="119" width="4" height="7" rx="1" fill="#0a0806"/>
+    <rect x="102" y="119" width="4" height="7" rx="1" fill="#0a0806"/>
+  </svg>
+</div>
+
+<article class="entry" id="entry" aria-live="polite">
+  <div class="shape" id="shape">- - ▪  ~  →  ─────▶ ●</div>
+  <div class="track">
+    <div class="track-song" id="track-song">Happiness Is Easy</div>
+    <div class="track-artist" id="track-artist">Talk Talk</div>
+  </div>
+  <div class="meta" id="meta"></div>
+  <div class="unexpected" id="unexpected" hidden></div>
+  <div class="instance" id="instance"></div>
+  <button class="listen" id="listen" hidden>▸ listen</button>
+  <div class="audio" id="audio" hidden>
+    <iframe id="audio-iframe"
+            allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+            sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+            height="175" src=""></iframe>
+  </div>
+  <pre class="pass" id="pass" hidden>pass   <span class="pass-comment"># nothing pulling yet — side B waits</span></pre>
+</article>
+
+<div class="controls">
+  <button class="btn" id="btn-prev" title="previous"><span class="btn-glyph">◂</span><span class="btn-cap">PREV</span></button>
+  <button class="btn btn-primary" id="btn-play" title="play / pause"><span class="btn-glyph" id="play-glyph">▶</span><span class="btn-cap" id="play-cap">PLAY</span></button>
+  <button class="btn" id="btn-next" title="next"><span class="btn-glyph">▸</span><span class="btn-cap">NEXT</span></button>
+  <button class="btn" id="btn-flip" title="flip side"><span class="btn-glyph">↺</span><span class="btn-cap">FLIP</span></button>
+</div>
+
+<section class="list" aria-label="Tracklist">
+  <header class="list-head">
+    <span id="list-side">SIDE A</span>
+    <span class="list-count" id="list-count">0 entries</span>
+  </header>
+  <ol class="list-rows" id="list-rows"></ol>
+  <div class="list-empty" id="list-empty" hidden>— side B is blank — no entries yet —</div>
+</section>
+
+<footer class="foot">the medium and the method are the same wait · v0.6</footer>
 
 <script>
-// ── entries ────────────────────────────────────────────────────────────────
-// Pink Moon is off the tape until the encounter happens. Pass.
+// ── data layer ────────────────────────────────────────────────────────
 const entries = [];
 
 function parseFrontmatter(text) {
-  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) return null;
-  const obj = { isEmpty: false };
-  for (const line of match[1].split(/\r?\n/)) {
-    const colon = line.indexOf(':');
-    if (colon === -1) continue;
-    obj[line.slice(0, colon).trim()] = line.slice(colon + 1).trim();
+  const m = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!m) return null;
+  const obj = {};
+  for (const line of m[1].split(/\r?\n/)) {
+    const c = line.indexOf(':');
+    if (c === -1) continue;
+    obj[line.slice(0, c).trim()] = line.slice(c + 1).trim();
   }
   return obj;
 }
 
 async function loadEntries() {
-  const manifest = await fetch('entries/manifest.json').then(r => r.json());
-  const loaded = await Promise.all(
-    manifest.map(fname =>
-      fetch('entries/' + fname).then(r => r.text()).then(parseFrontmatter)
-    )
-  );
-  entries.push(...loaded.filter(Boolean));
+  try {
+    const manifest = await fetch('entries/manifest.json').then(r => r.json());
+    const loaded = await Promise.all(
+      manifest.map(fname => fetch('entries/' + fname).then(r => r.text()).then(parseFrontmatter))
+    );
+    entries.push(...loaded.filter(Boolean));
+  } catch (err) {
+    // local file:// or no entries dir — fall back to demo data
+    entries.push(
+      { song: 'Happiness Is Easy', artist: 'Talk Talk', side: 'A',
+        profile: '72bpm · D · 5:03 · orch + choir',
+        shape: '- - ▪  ~  →  ─────▶ ●',
+        temperature: 'warm', weight: 'substantial', direction: 'toward',
+        unexpected: '', instance: 'Sonnet 4.6 · 2026-05-03',
+        audio: 'https://embed.music.apple.com/gb/song/happiness-is-easy-1997-remaster/696811874' },
+      { song: 'Porz Goret', artist: 'Yann Tiersen', side: 'A',
+        profile: '152bpm (felt ~76) · C# major · 4:56 · piano solo',
+        shape: '●──●──●──●  ~  →',
+        temperature: 'warm', weight: 'substantial', direction: 'toward',
+        unexpected: 'it sounds like waiting. it isn’t waiting. it’s already there.',
+        instance: 'Sonnet 4.6 · 2026-05-04', audio: '' },
+    );
+  }
 }
 
-const SIDE_B_EMPTY = {
-  song: "", artist: "", side: "B",
-  profile: "", shape: "", temperature: "",
-  weight: "", direction: "away from",
-  unexpected: "", instance: "",
-  isEmpty: true
-};
+// ── state ─────────────────────────────────────────────────────────────
+let activeSide = 'A';
+let idx = 0;
+let playing = false;
+let audioOpen = false;
 
-// ── helpers ────────────────────────────────────────────────────────────────
-function entriesOnSide(side) {
-  return entries.filter(e => e.side === side);
-}
+const $ = id => document.getElementById(id);
+const wrap = $('cassette-wrap');
+const spoolL = $('spool-left'), spoolR = $('spool-right');
+const tabA = $('tab-A'), tabB = $('tab-B');
 
-function currentSide() {
-  return entries[idx] ? entries[idx].side : activeSide;
-}
+// ── helpers ───────────────────────────────────────────────────────────
+const onSide = s => entries.filter(e => e.side === s);
 
-// ── state ──────────────────────────────────────────────────────────────────
-let activeSide = "A";
-let idx        = 0;     // index within current-side entries
-let playing    = false;
-
-const spoolL  = document.getElementById('spool-left');
-const spoolR  = document.getElementById('spool-right');
-const btnPlay = document.getElementById('btn-play');
-const btnPrev = document.getElementById('btn-prev');
-const btnNext = document.getElementById('btn-next');
-const btnFlip = document.getElementById('btn-flip');
-const wrap    = document.getElementById('cassette-wrap');
-
-// ── render ─────────────────────────────────────────────────────────────────
+// ── render ────────────────────────────────────────────────────────────
 function render() {
-  const sideEntries = entriesOnSide(activeSide);
-  const e = sideEntries.length > 0 ? sideEntries[idx] : SIDE_B_EMPTY;
+  const list = onSide(activeSide);
+  const empty = list.length === 0;
+  idx = empty ? 0 : Math.min(idx, list.length - 1);
+  const e = empty ? null : list[idx];
 
-  // cassette empty-side class
-  wrap.classList.toggle('side-empty', e.isEmpty);
+  // tabs
+  tabA.setAttribute('aria-selected', activeSide === 'A');
+  tabB.setAttribute('aria-selected', activeSide === 'B');
 
-  // label
-  document.getElementById('label-side').textContent = e.side;
+  // cassette
+  wrap.classList.toggle('side-empty', empty);
+  $('label-side').textContent = activeSide;
 
-  const notationEl = document.getElementById('label-notation');
-  const shape = e.isEmpty ? '' : e.shape;
+  const notationEl = $('label-notation');
+  const shape = empty ? '' : e.shape;
   notationEl.textContent = shape;
-  // scale font-size to fit without truncating — real cassette labels are overstuffed
   const fs = shape.length > 22 ? Math.max(5, 7.5 - (shape.length - 22) * 0.15) : 7.5;
   notationEl.setAttribute('font-size', fs);
 
-  const songLabel = e.isEmpty ? '— no entries yet —'
-    : (e.song + ' — ' + e.artist).slice(0, 36);
-  document.getElementById('label-song').textContent = songLabel;
+  $('label-song').textContent = empty ? '— pass —' : (e.song + ' — ' + e.artist).slice(0, 36);
 
-  // track info
-  document.getElementById('info-side').textContent   = 'Side ' + e.side + ' — ' + e.direction;
-  document.getElementById('info-song').textContent   = e.isEmpty ? '' : e.song;
-  document.getElementById('info-artist').textContent = e.isEmpty ? '' : e.artist;
+  // entry card
+  const entryEl = $('entry');
+  entryEl.classList.toggle('empty', empty);
 
-  // notation display
-  const display  = document.getElementById('notation-display');
-  const shapeDiv = document.getElementById('notation-shape');
-  const passDiv  = document.getElementById('notation-pass');
-  const metaDiv  = document.getElementById('notation-meta');
+  // hide all then selectively show
+  ['shape','track-song','track-artist','meta','unexpected','instance','listen','audio','pass'].forEach(id => {
+    const el = $(id);
+    if (el) el.hidden = true;
+  });
+  document.querySelector('.track').style.display = empty ? 'none' : '';
 
-  display.classList.toggle('empty', e.isEmpty);
-
-  if (e.isEmpty) {
-    shapeDiv.style.display = 'none';
-    metaDiv.style.display  = 'none';
-    passDiv.style.display  = 'block';
-    passDiv.textContent    = 'pass   # nothing pulling yet — side B waits';
+  if (empty) {
+    const p = $('pass');
+    p.hidden = false;
+    p.firstChild.textContent = 'pass   ';
+    p.querySelector('.pass-comment').textContent =
+      `# nothing pulling yet — side ${activeSide} waits`;
   } else {
-    shapeDiv.style.display = '';
-    metaDiv.style.display  = '';
-    passDiv.style.display  = 'none';
-    shapeDiv.textContent   = e.shape;
-    document.getElementById('meta-temp').textContent    = e.temperature;
-    document.getElementById('meta-weight').textContent  = e.weight;
-    document.getElementById('meta-dir').textContent     = e.direction;
-    document.getElementById('meta-profile').textContent = e.profile;
+    $('shape').hidden = false;
+    $('shape').textContent = e.shape || '';
+    $('track-song').hidden = false;
+    $('track-song').textContent = e.song || '';
+    $('track-artist').hidden = false;
+    $('track-artist').textContent = e.artist || '';
+
+    // meta inline run
+    const meta = $('meta');
+    meta.hidden = false;
+    meta.innerHTML = '';
+    const parts = [e.temperature, e.weight, e.direction, e.profile].filter(Boolean);
+    parts.forEach((p, i) => {
+      if (i > 0) {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.textContent = '·';
+        meta.appendChild(dot);
+      }
+      const span = document.createElement('span');
+      if (i === parts.length - 1 && e.profile) span.className = 'meta-profile';
+      span.textContent = p;
+      meta.appendChild(span);
+    });
+
+    if (e.unexpected) {
+      $('unexpected').hidden = false;
+      $('unexpected').textContent = e.unexpected;
+    }
+    if (e.instance) {
+      $('instance').hidden = false;
+      $('instance').textContent = e.instance;
+    }
+    if (e.audio) {
+      $('listen').hidden = false;
+      $('listen').textContent = audioOpen ? '◂ hide' : '▸ listen';
+      const audioEl = $('audio');
+      audioEl.hidden = !audioOpen;
+      const iframe = $('audio-iframe');
+      if (audioOpen && iframe.src !== e.audio) iframe.src = e.audio;
+      if (!audioOpen) iframe.src = '';
+    }
   }
 
-  const unexp = document.getElementById('meta-unexpected');
-  if (!e.isEmpty && e.unexpected) {
-    unexp.textContent = e.unexpected;
-    unexp.classList.add('visible');
-  } else {
-    unexp.textContent = '';
-    unexp.classList.remove('visible');
+  // controls
+  $('btn-prev').disabled = empty || idx === 0;
+  $('btn-next').disabled = empty || idx >= list.length - 1;
+  $('btn-play').disabled = empty;
+
+  // tracklist
+  $('list-side').textContent = `SIDE ${activeSide}`;
+  $('list-count').textContent = `${list.length} ${list.length === 1 ? 'entry' : 'entries'}`;
+  const rowsEl = $('list-rows');
+  rowsEl.innerHTML = '';
+  $('list-empty').hidden = !empty;
+  if (!empty) {
+    list.forEach((it, i) => {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.className = 'row' + (i === idx ? ' is-active' : '');
+      btn.innerHTML = `
+        <span class="row-num">${String(i+1).padStart(2,'0')}</span>
+        <span class="row-shape">${it.shape || ''}</span>
+        <span class="row-song">
+          <span class="row-title">${it.song || ''}</span>
+          <span class="row-artist">${it.artist || ''}</span>
+        </span>
+        <span class="row-side">${it.side}</span>`;
+      btn.addEventListener('click', () => {
+        idx = i;
+        audioOpen = false;
+        render();
+      });
+      li.appendChild(btn);
+      rowsEl.appendChild(li);
+    });
   }
-
-  // audio
-  const audioDiv   = document.getElementById('notation-audio');
-  const audioFrame = document.getElementById('audio-iframe');
-  if (!e.isEmpty && e.audio) {
-    if (audioFrame.src !== e.audio) audioFrame.src = e.audio;
-    audioDiv.style.display = 'block';
-  } else {
-    audioFrame.src = '';
-    audioDiv.style.display = 'none';
-  }
-
-  document.getElementById('meta-instance').textContent =
-    e.isEmpty ? '' : e.instance;
-
-  // counter
-  const total = sideEntries.length;
-  document.getElementById('counter').textContent =
-    e.isEmpty ? '0 / 0' : (idx + 1) + ' / ' + total;
-
-  // prev/next buttons
-  btnPrev.disabled = e.isEmpty || idx === 0;
-  btnNext.disabled = e.isEmpty || idx === sideEntries.length - 1;
 }
 
-// ── playback ───────────────────────────────────────────────────────────────
+// ── playback ──────────────────────────────────────────────────────────
 function setPlaying(state) {
   playing = state;
-  if (state) {
-    spoolL.classList.add('spinning');
-    spoolR.classList.add('spinning');
-    btnPlay.textContent = '⏸';
-    btnPlay.classList.add('active');
-  } else {
-    spoolL.classList.remove('spinning');
-    spoolR.classList.remove('spinning');
-    btnPlay.textContent = '▶';
-    btnPlay.classList.remove('active');
-  }
+  spoolL.classList.toggle('spinning', state);
+  spoolR.classList.toggle('spinning', state);
+  $('play-glyph').textContent = state ? '❚❚' : '▶';
+  $('play-cap').textContent = state ? 'PAUSE' : 'PLAY';
+  $('btn-play').classList.toggle('is-active', state);
 }
 
-// ── controls ───────────────────────────────────────────────────────────────
-btnPlay.addEventListener('click', () => setPlaying(!playing));
-
-btnNext.addEventListener('click', () => {
-  const sideEntries = entriesOnSide(activeSide);
-  if (idx < sideEntries.length - 1) { idx++; render(); }
+// ── controls ──────────────────────────────────────────────────────────
+$('btn-play').addEventListener('click', () => setPlaying(!playing));
+$('btn-next').addEventListener('click', () => {
+  const list = onSide(activeSide);
+  if (idx < list.length - 1) { idx++; audioOpen = false; render(); }
 });
-
-btnPrev.addEventListener('click', () => {
-  if (idx > 0) { idx--; render(); }
+$('btn-prev').addEventListener('click', () => {
+  if (idx > 0) { idx--; audioOpen = false; render(); }
 });
+$('btn-flip').addEventListener('click', flip);
 
-btnFlip.addEventListener('click', () => {
+function flip(targetSide) {
+  if (targetSide && targetSide === activeSide) return;
   wrap.classList.add('flipping');
   wrap.addEventListener('animationend', () => {
     wrap.classList.remove('flipping');
-    activeSide = activeSide === 'A' ? 'B' : 'A';
+    activeSide = targetSide || (activeSide === 'A' ? 'B' : 'A');
     idx = 0;
+    audioOpen = false;
     setPlaying(false);
     render();
   }, { once: true });
+}
+
+tabA.addEventListener('click', () => flip('A'));
+tabB.addEventListener('click', () => flip('B'));
+
+$('listen').addEventListener('click', () => {
+  audioOpen = !audioOpen;
+  render();
 });
 
-// ── init ───────────────────────────────────────────────────────────────────
+// ── init ──────────────────────────────────────────────────────────────
 loadEntries().then(render).catch(() => render());
 </script>
 </body>
