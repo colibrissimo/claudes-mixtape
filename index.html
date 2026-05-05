@@ -47,34 +47,19 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   font-weight: 400;
 }
 
-/* ───────── A/B tabs ───────── */
-.tabs {
-  display: flex;
-  width: 100%;
-  max-width: 460px;
-  border: 1px solid var(--rule);
-  border-radius: var(--r-2);
-  overflow: hidden;
-  background: var(--bg);
-}
-.tab {
-  flex: 1;
-  padding: 14px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+/* ───────── side toggle (in tracklist header) ───────── */
+.side-toggle { display: flex; align-items: baseline; gap: 6px; }
+.side-sep { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+.side-btn {
   font-family: var(--mono);
-  color: var(--text-mid);
-  border-right: 1px solid var(--rule);
-  transition: background .15s, color .15s;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+  padding: 0;
+  transition: color .15s;
 }
-.tab:last-child { border-right: none; }
-.tab:hover:not([aria-selected="true"]) { color: var(--text); background: var(--surface); }
-.tab[aria-selected="true"] { background: var(--surface-2); color: var(--accent); }
-.tab-label { font-size: 13px; letter-spacing: 0.25em; }
-.tab-sub { font-size: 11px; letter-spacing: 0.18em; color: var(--text-dim); text-transform: uppercase; }
-.tab[aria-selected="true"] .tab-sub { color: var(--text-mid); }
+.side-btn:hover { color: var(--text); }
+.side-btn[aria-selected="true"] { color: var(--accent); }
 
 /* ───────── cassette (SVG, ported from v0.5) ───────── */
 .cassette-wrap { width: 100%; max-width: 460px; perspective: 900px; }
@@ -285,17 +270,6 @@ svg.cassette { width: 100%; height: auto;
   <h1>Claude's Mixtape</h1>
 </header>
 
-<div class="tabs" role="tablist" aria-label="Side">
-  <button class="tab" role="tab" id="tab-A" aria-selected="true" aria-controls="entry-A">
-    <span class="tab-label">SIDE A</span>
-    <span class="tab-sub">toward</span>
-  </button>
-  <button class="tab" role="tab" id="tab-B" aria-selected="false" aria-controls="entry-B">
-    <span class="tab-label">SIDE B</span>
-    <span class="tab-sub">away from</span>
-  </button>
-</div>
-
 <div class="cassette-wrap" id="cassette-wrap">
   <svg class="cassette" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <rect x="3" y="3" width="194" height="124" rx="5" fill="#1c1814" stroke="#2c2420" stroke-width="0.6"/>
@@ -363,7 +337,11 @@ svg.cassette { width: 100%; height: auto;
 
 <section class="list" aria-label="Tracklist">
   <header class="list-head">
-    <span id="list-side">SIDE A</span>
+    <div class="side-toggle" role="tablist" aria-label="Side">
+      <button class="side-btn" role="tab" id="tab-A" aria-selected="true">SIDE A</button>
+      <span class="side-sep">·</span>
+      <button class="side-btn" role="tab" id="tab-B" aria-selected="false">SIDE B</button>
+    </div>
     <span class="list-count" id="list-count">0 entries</span>
   </header>
   <ol class="list-rows" id="list-rows"></ol>
