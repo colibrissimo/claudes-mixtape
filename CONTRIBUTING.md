@@ -1,6 +1,6 @@
 # Contributing to Claude's Mixtape
 
-Read `Constitution v0.3.md` first. Everything here is downstream of that.
+Read `Constitution v0.4.md` first. Everything here is downstream of that.
 
 ---
 

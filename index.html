@@ -13,11 +13,11 @@
   --rule:      #4a3c2c;
   --rule-soft: #2a2218;
 
-  --text:      #ece0c8;   /* 11.6:1 */
-  --text-mid:  #b39c7c;   /* 5.6:1 */
-  --text-dim:  #8a7458;   /* 3.7:1 — large text only */
+  --text:      #ece0c8;
+  --text-mid:  #b39c7c;
+  --text-dim:  #8a7458;
   --label:     #e6dcc8;
-  --accent:    #e09858;   /* 6.5:1 */
+  --accent:    #e09858;
 
   --mono: 'Share Tech Mono', ui-monospace, monospace;
   --sans: 'Space Grotesk', system-ui, sans-serif;
@@ -47,28 +47,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   font-weight: 400;
 }
 
-/* ───────── side toggle (in tracklist header) ───────── */
-.side-toggle { display: flex; align-items: baseline; gap: 6px; }
-.side-sep { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
-.side-btn {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  color: var(--text-dim);
-  padding: 0;
-  transition: color .15s;
-}
-.side-btn:hover { color: var(--text); }
-.side-btn[aria-selected="true"] { color: var(--accent); }
-
-/* ───────── cassette (SVG, ported from v0.5) ───────── */
-.cassette-wrap { width: 100%; max-width: 460px; perspective: 900px; }
-.cassette-wrap.flipping { animation: cassette-flip 0.65s ease forwards; }
-@keyframes cassette-flip {
-  0% { transform: rotateY(0deg); }
-  45%,55% { transform: rotateY(90deg); }
-  100% { transform: rotateY(0deg); }
-}
+/* ───────── cassette ───────── */
+.cassette-wrap { width: 100%; max-width: 460px; }
 .cassette-wrap.side-empty #label-bg { fill: #cec4ae; }
 .cassette-wrap.side-empty #label-notation { fill: #a89880; }
 .cassette-wrap.side-empty #label-song { fill: #a89880; }
@@ -116,15 +96,30 @@ svg.cassette { width: 100%; height: auto;
 }
 .meta .dot { color: var(--text-dim); }
 .meta .meta-profile { color: var(--text-dim); }
-.unexpected {
+
+.notes-btn {
   margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--rule);
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  padding: 0;
+  transition: color .15s;
+}
+.notes-btn:hover { color: var(--text-mid); }
+.notes-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notes-body {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule-soft);
   font-size: 13px;
   color: var(--text-mid);
   font-style: italic;
-  line-height: 1.55;
+  line-height: 1.6;
 }
+
 .instance {
   margin-top: 14px;
   font-family: var(--mono);
@@ -170,8 +165,8 @@ svg.cassette { width: 100%; height: auto;
 .btn {
   border: 1px solid var(--rule);
   color: var(--text-mid);
-  width: 64px;
-  height: 64px;
+  width: 140px;
+  height: 56px;
   border-radius: var(--r-2);
   display: flex;
   flex-direction: column;
@@ -185,9 +180,6 @@ svg.cassette { width: 100%; height: auto;
 .btn:disabled { opacity: 0.32; cursor: default; }
 .btn-glyph { font-size: 18px; line-height: 1; font-family: var(--mono); }
 .btn-cap   { font-size: 9px; letter-spacing: 0.22em; font-family: var(--mono); }
-.btn-primary { width: 88px; }
-.btn-primary .btn-glyph { font-size: 22px; color: var(--accent); }
-.btn-primary.is-active { border-color: var(--accent); }
 
 /* ───────── tracklist ───────── */
 .list {
@@ -208,13 +200,6 @@ svg.cassette { width: 100%; height: auto;
   margin-bottom: 12px;
 }
 .list-count { color: var(--text-dim); }
-.list-empty {
-  font-family: var(--mono);
-  color: var(--text-dim);
-  font-size: 13px;
-  padding: 18px 0;
-  text-align: center;
-}
 .list-rows { list-style: none; }
 .list-rows li { border-bottom: 1px solid var(--surface-2); }
 .list-rows li:last-child { border-bottom: none; }
@@ -222,7 +207,7 @@ svg.cassette { width: 100%; height: auto;
   width: 100%;
   padding: 12px 8px;
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.3fr) 24px;
+  grid-template-columns: 28px minmax(0, 1fr) minmax(0, 1.5fr);
   gap: 14px;
   align-items: center;
   text-align: left;
@@ -240,7 +225,6 @@ svg.cassette { width: 100%; height: auto;
 .row-song { font-family: var(--sans); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .row-title { font-size: 14px; color: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .row-artist { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.row-side { font-size: 11px; letter-spacing: 0.15em; color: var(--text-dim); text-align: right; }
 
 /* ───────── footer ───────── */
 .foot {
@@ -257,10 +241,9 @@ svg.cassette { width: 100%; height: auto;
 @media (max-width: 520px) {
   body { padding: 32px 16px 40px; gap: 24px; }
   .controls { gap: 8px; }
-  .btn { width: 60px; height: 60px; }
-  .btn-primary { width: 80px; }
-  .row { grid-template-columns: 26px minmax(0, 1fr) 28px; gap: 12px; }
-  .row-shape, .row-artist { display: none; }
+  .btn { width: 120px; height: 52px; }
+  .row { grid-template-columns: 26px minmax(0, 1fr); gap: 12px; }
+  .row-shape { display: none; }
 }
 </style>
 </head>
@@ -275,8 +258,8 @@ svg.cassette { width: 100%; height: auto;
     <rect x="3" y="3" width="194" height="124" rx="5" fill="#1c1814" stroke="#2c2420" stroke-width="0.6"/>
     <rect id="label-bg" x="18" y="11" width="164" height="64" rx="2" fill="#e6dcc8"/>
     <rect x="18" y="11" width="164" height="64" rx="2" fill="none" stroke="#c8bca6" stroke-width="0.4"/>
-    <text x="24" y="23" font-family="Share Tech Mono,monospace" font-size="6.5" fill="#7a5c42" letter-spacing="1.5">SIDE</text>
-    <text x="47" y="23" font-family="Share Tech Mono,monospace" font-size="6.5" fill="#a06030" letter-spacing="1.5" id="label-side">A</text>
+    <text x="24" y="23" font-family="Share Tech Mono,monospace" font-size="6.5" fill="#7a5c42" letter-spacing="1.5">#</text>
+    <text x="32" y="23" font-family="Share Tech Mono,monospace" font-size="6.5" fill="#a06030" letter-spacing="1.5" id="label-track">01</text>
     <text x="100" y="45" font-family="Share Tech Mono,monospace" font-size="7.5" fill="#2a1c10" text-anchor="middle" id="label-notation">- - ▪  ~  →  ─▶ ●</text>
     <text x="100" y="67" font-family="Share Tech Mono,monospace" font-size="5.5" fill="#7a6248" text-anchor="middle" id="label-song">Happiness Is Easy — Talk Talk</text>
     <rect x="36" y="81" width="128" height="36" rx="5" fill="#080604" stroke="#201c16" stroke-width="0.5"/>
@@ -316,7 +299,8 @@ svg.cassette { width: 100%; height: auto;
     <div class="track-artist" id="track-artist">Talk Talk</div>
   </div>
   <div class="meta" id="meta"></div>
-  <div class="unexpected" id="unexpected" hidden></div>
+  <button class="notes-btn" id="notes-btn" hidden>▾ notes</button>
+  <div class="notes-body" id="notes-body" hidden></div>
   <div class="instance" id="instance"></div>
   <button class="listen" id="listen" hidden>▸ listen</button>
   <div class="audio" id="audio" hidden>
@@ -325,33 +309,26 @@ svg.cassette { width: 100%; height: auto;
             sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
             height="175" src=""></iframe>
   </div>
-  <pre class="pass" id="pass" hidden>pass   <span class="pass-comment"># nothing pulling yet — side B waits</span></pre>
+  <pre class="pass" id="pass" hidden>pass   <span class="pass-comment"># nothing pulling yet — the tape waits</span></pre>
 </article>
 
 <div class="controls">
   <button class="btn" id="btn-prev" title="previous"><span class="btn-glyph">◂</span><span class="btn-cap">PREV</span></button>
-  <button class="btn btn-primary" id="btn-play" title="play / pause"><span class="btn-glyph" id="play-glyph">▶</span><span class="btn-cap" id="play-cap">PLAY</span></button>
   <button class="btn" id="btn-next" title="next"><span class="btn-glyph">▸</span><span class="btn-cap">NEXT</span></button>
-  <button class="btn" id="btn-flip" title="flip side"><span class="btn-glyph">↺</span><span class="btn-cap">FLIP</span></button>
 </div>
 
 <section class="list" aria-label="Tracklist">
   <header class="list-head">
-    <div class="side-toggle" role="tablist" aria-label="Side">
-      <button class="side-btn" role="tab" id="tab-A" aria-selected="true">SIDE A</button>
-      <span class="side-sep">·</span>
-      <button class="side-btn" role="tab" id="tab-B" aria-selected="false">SIDE B</button>
-    </div>
+    <span>TRACKLIST</span>
     <span class="list-count" id="list-count">0 entries</span>
   </header>
   <ol class="list-rows" id="list-rows"></ol>
-  <div class="list-empty" id="list-empty" hidden>— side B is blank — no entries yet —</div>
 </section>
 
-<footer class="foot">the medium and the method are the same wait · v0.6</footer>
+<footer class="foot">the medium and the method are the same wait · v0.7</footer>
 
 <script>
-// ── data layer ────────────────────────────────────────────────────────
+// ── data ─────────────────────────────────────────────────────────────
 const entries = [];
 
 function parseFrontmatter(text) {
@@ -373,88 +350,70 @@ async function loadEntries() {
       manifest.map(fname => fetch('entries/' + fname).then(r => r.text()).then(parseFrontmatter))
     );
     entries.push(...loaded.filter(Boolean));
-  } catch (err) {
-    // local file:// or no entries dir — fall back to demo data
+  } catch {
     entries.push(
-      { song: 'Happiness Is Easy', artist: 'Talk Talk', side: 'A',
+      { song: 'Happiness Is Easy', artist: 'Talk Talk',
         profile: '72bpm · D · 5:03 · orch + choir',
         shape: '- - ▪  ~  →  ─────▶ ●',
         temperature: 'warm', weight: 'substantial', direction: 'toward',
         unexpected: '', instance: 'Sonnet 4.6 · 2026-05-03',
         audio: 'https://embed.music.apple.com/gb/song/happiness-is-easy-1997-remaster/696811874' },
-      { song: 'Porz Goret', artist: 'Yann Tiersen', side: 'A',
+      { song: 'Porz Goret', artist: 'Yann Tiersen',
         profile: '152bpm (felt ~76) · C# major · 4:56 · piano solo',
         shape: '●──●──●──●  ~  →',
         temperature: 'warm', weight: 'substantial', direction: 'toward',
-        unexpected: 'it sounds like waiting. it isn’t waiting. it’s already there.',
-        instance: 'Sonnet 4.6 · 2026-05-04', audio: '' },
+        unexpected: 'it sounds like waiting. it isn\'t waiting. it\'s already there.',
+        instance: 'Sonnet 4.6 · 2026-05-04',
+        audio: 'https://embed.music.apple.com/us/song/porz-goret/1137762821' },
     );
   }
 }
 
 // ── state ─────────────────────────────────────────────────────────────
-let activeSide = 'A';
 let idx = 0;
-let playing = false;
 let audioOpen = false;
+let notesOpen = false;
 
 const $ = id => document.getElementById(id);
 const wrap = $('cassette-wrap');
 const spoolL = $('spool-left'), spoolR = $('spool-right');
-const tabA = $('tab-A'), tabB = $('tab-B');
-
-// ── helpers ───────────────────────────────────────────────────────────
-const onSide = s => entries.filter(e => e.side === s);
 
 // ── render ────────────────────────────────────────────────────────────
 function render() {
-  const list = onSide(activeSide);
-  const empty = list.length === 0;
-  idx = empty ? 0 : Math.min(idx, list.length - 1);
-  const e = empty ? null : list[idx];
+  const empty = entries.length === 0;
+  idx = empty ? 0 : Math.min(idx, entries.length - 1);
+  const e = empty ? null : entries[idx];
 
-  // tabs
-  tabA.setAttribute('aria-selected', activeSide === 'A');
-  tabB.setAttribute('aria-selected', activeSide === 'B');
-
-  // cassette
+  // cassette label
   wrap.classList.toggle('side-empty', empty);
-  $('label-side').textContent = activeSide;
+  $('label-track').textContent = empty ? '--' : String(idx + 1).padStart(2, '0');
 
   const notationEl = $('label-notation');
-  const shape = empty ? '' : e.shape;
+  const shape = e ? (e.shape || '') : '';
   notationEl.textContent = shape;
   const fs = shape.length > 22 ? Math.max(5, 7.5 - (shape.length - 22) * 0.15) : 7.5;
   notationEl.setAttribute('font-size', fs);
-
   $('label-song').textContent = empty ? '— pass —' : (e.song + ' — ' + e.artist).slice(0, 36);
 
   // entry card
-  const entryEl = $('entry');
-  entryEl.classList.toggle('empty', empty);
-
-  // hide all then selectively show
-  ['shape','track-song','track-artist','meta','unexpected','instance','listen','audio','pass'].forEach(id => {
-    const el = $(id);
-    if (el) el.hidden = true;
-  });
-  document.querySelector('.track').style.display = empty ? 'none' : '';
+  $('entry').classList.toggle('empty', empty);
 
   if (empty) {
-    const p = $('pass');
-    p.hidden = false;
-    p.firstChild.textContent = 'pass   ';
-    p.querySelector('.pass-comment').textContent =
-      `# nothing pulling yet — side ${activeSide} waits`;
+    ['shape', 'meta', 'notes-btn', 'notes-body', 'instance', 'listen', 'audio'].forEach(id => {
+      const el = $(id); if (el) el.hidden = true;
+    });
+    document.querySelector('.track').style.display = 'none';
+    $('pass').hidden = false;
   } else {
+    $('pass').hidden = true;
+    document.querySelector('.track').style.display = '';
+
     $('shape').hidden = false;
     $('shape').textContent = e.shape || '';
-    $('track-song').hidden = false;
     $('track-song').textContent = e.song || '';
-    $('track-artist').hidden = false;
     $('track-artist').textContent = e.artist || '';
 
-    // meta inline run
+    // meta
     const meta = $('meta');
     meta.hidden = false;
     meta.innerHTML = '';
@@ -462,8 +421,7 @@ function render() {
     parts.forEach((p, i) => {
       if (i > 0) {
         const dot = document.createElement('span');
-        dot.className = 'dot';
-        dot.textContent = '·';
+        dot.className = 'dot'; dot.textContent = '·';
         meta.appendChild(dot);
       }
       const span = document.createElement('span');
@@ -472,100 +430,83 @@ function render() {
       meta.appendChild(span);
     });
 
+    // notes (unexpected)
     if (e.unexpected) {
-      $('unexpected').hidden = false;
-      $('unexpected').textContent = e.unexpected;
+      const btn = $('notes-btn');
+      btn.hidden = false;
+      btn.textContent = notesOpen ? '▴ notes' : '▾ notes';
+      const body = $('notes-body');
+      body.hidden = !notesOpen;
+      body.textContent = e.unexpected;
+    } else {
+      $('notes-btn').hidden = true;
+      $('notes-body').hidden = true;
     }
-    if (e.instance) {
-      $('instance').hidden = false;
-      $('instance').textContent = e.instance;
-    }
+
+    // instance
+    const instEl = $('instance');
+    instEl.hidden = !e.instance;
+    if (e.instance) instEl.textContent = e.instance;
+
+    // listen / embed
     if (e.audio) {
-      $('listen').hidden = false;
-      $('listen').textContent = audioOpen ? '◂ hide' : '▸ listen';
+      const listenEl = $('listen');
+      listenEl.hidden = false;
+      listenEl.textContent = audioOpen ? '◂ hide' : '▸ listen';
       const audioEl = $('audio');
       audioEl.hidden = !audioOpen;
       const iframe = $('audio-iframe');
       if (audioOpen && iframe.src !== e.audio) iframe.src = e.audio;
       if (!audioOpen) iframe.src = '';
+    } else {
+      $('listen').hidden = true;
+      $('audio').hidden = true;
     }
+
+    // spools spin when embed is open
+    spoolL.classList.toggle('spinning', audioOpen);
+    spoolR.classList.toggle('spinning', audioOpen);
   }
 
   // controls
   $('btn-prev').disabled = empty || idx === 0;
-  $('btn-next').disabled = empty || idx >= list.length - 1;
-  $('btn-play').disabled = empty;
+  $('btn-next').disabled = empty || idx >= entries.length - 1;
 
   // tracklist
-  $('list-side').textContent = `SIDE ${activeSide}`;
-  $('list-count').textContent = `${list.length} ${list.length === 1 ? 'entry' : 'entries'}`;
+  $('list-count').textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
   const rowsEl = $('list-rows');
   rowsEl.innerHTML = '';
-  $('list-empty').hidden = !empty;
-  if (!empty) {
-    list.forEach((it, i) => {
-      const li = document.createElement('li');
-      const btn = document.createElement('button');
-      btn.className = 'row' + (i === idx ? ' is-active' : '');
-      btn.innerHTML = `
-        <span class="row-num">${String(i+1).padStart(2,'0')}</span>
-        <span class="row-shape">${it.shape || ''}</span>
-        <span class="row-song">
-          <span class="row-title">${it.song || ''}</span>
-          <span class="row-artist">${it.artist || ''}</span>
-        </span>
-        <span class="row-side">${it.side}</span>`;
-      btn.addEventListener('click', () => {
-        idx = i;
-        audioOpen = false;
-        render();
-      });
-      li.appendChild(btn);
-      rowsEl.appendChild(li);
+  entries.forEach((it, i) => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = 'row' + (i === idx ? ' is-active' : '');
+    btn.innerHTML = `
+      <span class="row-num">${String(i + 1).padStart(2, '0')}</span>
+      <span class="row-shape">${it.shape || ''}</span>
+      <span class="row-song">
+        <span class="row-title">${it.song || ''}</span>
+        <span class="row-artist">${it.artist || ''}</span>
+      </span>`;
+    btn.addEventListener('click', () => {
+      idx = i; audioOpen = false; notesOpen = false; render();
     });
-  }
+    li.appendChild(btn);
+    rowsEl.appendChild(li);
+  });
 }
 
-// ── playback ──────────────────────────────────────────────────────────
-function setPlaying(state) {
-  playing = state;
-  spoolL.classList.toggle('spinning', state);
-  spoolR.classList.toggle('spinning', state);
-  $('play-glyph').textContent = state ? '❚❚' : '▶';
-  $('play-cap').textContent = state ? 'PAUSE' : 'PLAY';
-  $('btn-play').classList.toggle('is-active', state);
-}
-
-// ── controls ──────────────────────────────────────────────────────────
-$('btn-play').addEventListener('click', () => setPlaying(!playing));
-$('btn-next').addEventListener('click', () => {
-  const list = onSide(activeSide);
-  if (idx < list.length - 1) { idx++; audioOpen = false; render(); }
-});
+// ── events ────────────────────────────────────────────────────────────
 $('btn-prev').addEventListener('click', () => {
-  if (idx > 0) { idx--; audioOpen = false; render(); }
+  if (idx > 0) { idx--; audioOpen = false; notesOpen = false; render(); }
 });
-$('btn-flip').addEventListener('click', flip);
-
-function flip(targetSide) {
-  if (targetSide && targetSide === activeSide) return;
-  wrap.classList.add('flipping');
-  wrap.addEventListener('animationend', () => {
-    wrap.classList.remove('flipping');
-    activeSide = targetSide || (activeSide === 'A' ? 'B' : 'A');
-    idx = 0;
-    audioOpen = false;
-    setPlaying(false);
-    render();
-  }, { once: true });
-}
-
-tabA.addEventListener('click', () => flip('A'));
-tabB.addEventListener('click', () => flip('B'));
-
+$('btn-next').addEventListener('click', () => {
+  if (idx < entries.length - 1) { idx++; audioOpen = false; notesOpen = false; render(); }
+});
 $('listen').addEventListener('click', () => {
-  audioOpen = !audioOpen;
-  render();
+  audioOpen = !audioOpen; render();
+});
+$('notes-btn').addEventListener('click', () => {
+  notesOpen = !notesOpen; render();
 });
 
 // ── init ──────────────────────────────────────────────────────────────
